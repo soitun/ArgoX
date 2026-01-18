@@ -15,7 +15,7 @@ NGINX_PORT='8080'
 METRICS_PORT='3333'
 CDN_DOMAIN=("skk.moe" "ip.sb" "time.is" "cfip.xxxxxxxx.tk" "bestcf.top" "cdn.2020111.xyz" "xn--b6gac.eu.org" "cf.090227.xyz")
 SUBSCRIBE_TEMPLATE="https://raw.githubusercontent.com/fscarmen/client_template/main"
-DEFAULT_XRAY_VERSION='25.12.8'
+DEFAULT_XRAY_VERSION='26.1.18'
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -710,8 +710,7 @@ http {
     ~*v2rayN|Neko|Throne       /base64;          # 匹配 V2rayN / NekoBox / Throne 客户端
     ~*clash                    /clash;           # 匹配 Clash 客户端
     ~*ShadowRocket             /shadowrocket;    # 匹配 ShadowRocket  客户端
-    ~*SFM                      /sing-box-pc;     # 匹配 Sing-box pc 客户端
-    ~*SFI|SFA                  /sing-box-phone;  # 匹配 Sing-box phone 客户端
+    ~*SFM|SFI|SFA              /sing-box;        # 匹配 Sing-box 官方客户端
  #   ~*Chrome|Firefox|Mozilla  /;                # 添加更多的分流规则
   }
 
@@ -1643,9 +1642,8 @@ ss://$(echo -n "${SS_METHOD}:${UUID}" | base64 -w0)@${SERVER}:443?plugin=v2ray-p
   local NODE_REPLACE="\"${NODE_NAME} reality-vision\", \"${NODE_NAME} reality-grpc\", \"${NODE_NAME}-Vl\", \"${NODE_NAME}-Vm\", \"${NODE_NAME}-Tr\", \"${NODE_NAME}-Sh\""
 
   # 模板
-  local SING_BOX_JSON1=$(wget --no-check-certificate -qO- --tries=3 --timeout=2 ${SUBSCRIBE_TEMPLATE}/sing-box1)
-  echo $SING_BOX_JSON1 | sed 's#, {[^}]\+"tun-in"[^}]\+}##' | sed "s#\"<INBOUND_REPLACE>\"#$INBOUND_REPLACE#; s#\"<NODE_REPLACE>\"#$NODE_REPLACE#g" | $WORK_DIR/jq > $WORK_DIR/subscribe/sing-box-pc
-  echo $SING_BOX_JSON1 | sed 's# {[^}]\+"mixed"[^}]\+},##; s#, "auto_detect_interface": true##' | sed "s#\"<INBOUND_REPLACE>\"#$INBOUND_REPLACE#; s#\"<NODE_REPLACE>\"#$NODE_REPLACE#g" | $WORK_DIR/jq > $WORK_DIR/subscribe/sing-box-phone
+  local SING_BOX_JSON=$(wget --no-check-certificate -qO- --tries=3 --timeout=2 ${SUBSCRIBE_TEMPLATE}/sing-box)
+  echo $SING_BOX_JSON | sed "s#\"<INBOUND_REPLACE>\"#$INBOUND_REPLACE#; s#\"<NODE_REPLACE>\"#$NODE_REPLACE#g" | $WORK_DIR/jq > $WORK_DIR/subscribe/sing-box
 
   # 生成二维码 url 文件
   [ "$IS_NGINX" = 'is_nginx' ] && cat > $WORK_DIR/subscribe/qr << EOF
@@ -1721,11 +1719,8 @@ https://${ARGO_DOMAIN}/${UUID}/base64")
 $(info "Clash $(text 66):
 https://${ARGO_DOMAIN}/${UUID}/clash
 
-sing-box for pc $(text 66):
-https://${ARGO_DOMAIN}/${UUID}/sing-box-pc
-
-sing-box for cellphone $(text 66):
-https://${ARGO_DOMAIN}/${UUID}/sing-box-phone
+sing-box $(text 66):
+https://${ARGO_DOMAIN}/${UUID}/sing-box
 
 Shadowrocket $(text 66):
 https://${ARGO_DOMAIN}/${UUID}/shadowrocket")
